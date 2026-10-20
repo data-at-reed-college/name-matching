@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^data-raw$
+^analysis$
+^NOTES\.md$
+^fuzzy_name_match\.R$
+^.*\.csv$
+^README\.Rmd$
+^\.DS_Store$

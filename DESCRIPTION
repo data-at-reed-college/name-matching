@@ -1,0 +1,29 @@
+Package: namematch
+Title: Fuzzy Matching of Messy Name Files
+Version: 0.1.0
+Authors@R: 
+    person("Frank", "Adonteng", email = "adontengfrank58@gmail.com",
+           role = c("aut", "cre"))
+Description: Matches rows of one table of person names to rows of a
+    reference table using a sequence of independent, pipeable steps: exact
+    names, token sets, Jaro-Winkler typos, Soundex, nicknames, first word,
+    first initial and compound last names. Optional shared variables (such
+    as zip code) can block candidates, break ties and verify fuzzy matches,
+    and a summary reports what each step contributed.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+Depends: 
+    R (>= 4.1.0)
+Imports:
+    dplyr (>= 1.1.0),
+    readr,
+    rlang,
+    stringdist,
+    stringi,
+    tibble
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+LazyData: true
