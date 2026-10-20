@@ -40,7 +40,7 @@ run_step <- function(obj, cands, step, verify, hold_unmatched = FALSE) {
   }
 
   rows <- dplyr::mutate(rows, n_candidates = dplyr::n(), .by = ".x_row")
-  if (length(check_vars) > 0) {
+  if (length(check_vars) > 0 && nrow(rows) > 0) {
     agree_cols <- paste0("agree_", check_vars)
     rows$n_agree <- n_true(rows[agree_cols])
     rows <- dplyr::filter(rows, .data$n_agree == max(.data$n_agree), .by = ".x_row")

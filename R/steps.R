@@ -246,6 +246,7 @@ first_word <- function(x) sub(" .*$", "", x)
 initials_only <- function(x) grepl("^[A-Z0-9]( [A-Z0-9])*$", x)
 
 soundex <- function(x) {
+  if (length(x) == 0) return(character())
   stringdist::phonetic(gsub(" ", "", x, fixed = TRUE), method = "soundex")
 }
 

@@ -94,8 +94,10 @@ default.
 nickname group (BOB / ROBERT). See \link{nicknames}.
 \item \code{match_first_word()}: last name exact and the first word of the first
 name agrees (LISA E / LISA, ANN ELOISE / ANN).
-\item \code{match_initial()}: last name exact and one side's first name is a single
-initial that starts the other's (D FRANKENSTEIN / DRACULA FRANKENSTEIN).
+\item \code{match_initial()}: last name exact and one side's first name is only
+initials, the first of which starts the other's first name
+(D FRANKENSTEIN / DRACULA FRANKENSTEIN, D J LEE / DAVID LEE). A name
+such as S RENEE is not treated as an initial.
 \item \code{match_compound_last()}: first name exact and one side's last-name words
 are a subset of the other's (GARCIA LOPEZ / GARCIA).
 }

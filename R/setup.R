@@ -67,6 +67,9 @@ nm_setup <- function(x, y, first, last, id, block_by = NULL, check_by = NULL,
                      missing_values = character()) {
   if (!is.data.frame(x)) rlang::abort("`x` must be a data frame.")
   if (!is.data.frame(y)) rlang::abort("`y` must be a data frame.")
+  if (missing(first)) rlang::abort("`first` is required.")
+  if (missing(last)) rlang::abort("`last` is required.")
+  if (missing(id)) rlang::abort("`id` is required.")
 
   first <- parse_spec(first, "first", x, y, single = TRUE)
   last <- parse_spec(last, "last", x, y, single = TRUE)
