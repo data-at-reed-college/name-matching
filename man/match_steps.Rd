@@ -14,7 +14,7 @@
 \usage{
 match_exact(obj, verify = "none")
 
-match_tokens(obj, verify = "none")
+match_tokens(obj, verify = "no_conflict")
 
 match_typo(
   obj,
@@ -84,6 +84,9 @@ remains after \code{block_by} filtering and \code{check_by} tie-breaking (see
 \item \code{match_exact()}: same normalized first and last name.
 \item \code{match_tokens()}: the same words in first + last combined, in any order
 or split (FRANKENSTEIN, BARON VON vs VON FRANKENSTEIN, BARON).
+Verified against check variables by default: many names work as either
+a first or a last name (CRAIG TAYLOR / TAYLOR CRAIG), and a swapped
+match is often a different person.
 \item \code{match_typo()}: first name within a Jaro-Winkler distance of the
 reference and last name exact, or the other way round (KATHRYN /
 KATHERYN). Only names sharing a first letter are compared.
@@ -116,8 +119,8 @@ both sides and agrees.
 }
 
 Without \code{check_by} variables every mode accepts. The defaults are
-\code{"none"} for the stricter steps (exact, tokens, typo, nickname) and
-\code{"no_conflict"} for the looser ones (Soundex, first word, initial,
+\code{"none"} for the stricter steps (exact, typo, nickname) and
+\code{"no_conflict"} for the looser ones (tokens, Soundex, first word, initial,
 compound last name).
 }
 

@@ -40,7 +40,7 @@ run <- function(x, config) {
   } else {
     m |>
       match_exact() |>
-      match_tokens() |>
+      match_tokens(verify = "none") |>
       match_typo() |>
       match_soundex(verify = "none") |>
       match_nickname() |>

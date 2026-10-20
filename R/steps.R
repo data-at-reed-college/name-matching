@@ -20,6 +20,9 @@
 #' * `match_exact()`: same normalized first and last name.
 #' * `match_tokens()`: the same words in first + last combined, in any order
 #'   or split (FRANKENSTEIN, BARON VON vs VON FRANKENSTEIN, BARON).
+#'   Verified against check variables by default: many names work as either
+#'   a first or a last name (CRAIG TAYLOR / TAYLOR CRAIG), and a swapped
+#'   match is often a different person.
 #' * `match_typo()`: first name within a Jaro-Winkler distance of the
 #'   reference and last name exact, or the other way round (KATHRYN /
 #'   KATHERYN). Only names sharing a first letter are compared.
@@ -47,8 +50,8 @@
 #'   both sides and agrees.
 #'
 #' Without `check_by` variables every mode accepts. The defaults are
-#' `"none"` for the stricter steps (exact, tokens, typo, nickname) and
-#' `"no_conflict"` for the looser ones (Soundex, first word, initial,
+#' `"none"` for the stricter steps (exact, typo, nickname) and
+#' `"no_conflict"` for the looser ones (tokens, Soundex, first word, initial,
 #' compound last name).
 #'
 #' @section Warning:
@@ -101,7 +104,7 @@ match_exact <- function(obj, verify = "none") {
 
 #' @rdname match_steps
 #' @export
-match_tokens <- function(obj, verify = "none") {
+match_tokens <- function(obj, verify = "no_conflict") {
   obj <- ensure_exact(obj)
   dn <- pool_names(obj)
   dn$tok <- token_key(dn$.first, dn$.last)

@@ -56,7 +56,7 @@ step is optional and can run in any order.
 | step | matches | default `verify` |
 |------|---------|------------------|
 | `match_exact()` | same first and last name | `"none"` |
-| `match_tokens()` | same words in any order or split: FRANKENSTEIN, BARON VON / VON FRANKENSTEIN, BARON | `"none"` |
+| `match_tokens()` | same words in any order or split: FRANKENSTEIN, BARON VON / VON FRANKENSTEIN, BARON | `"no_conflict"` |
 | `match_nickname()` | last name exact, first names in a nickname group: BOB / ROBERT (see `?nicknames`) | `"none"` |
 | `match_typo()` | one name exact, the other within a Jaro-Winkler distance: KATHERYN / KATHRYN | `"none"` |
 | `match_first_word()` | last name exact, first word of the first name agrees: LISA E / LISA | `"no_conflict"` |
@@ -111,15 +111,15 @@ m <- nm_setup(
   match_compound_last()
 
 nm_summary(m)
-#> Matched 8,937 of 12,211 rows (73.2%); 3,274 unmatched, of which 75 ambiguous and 85 missing a name.
+#> Matched 8,929 of 12,211 rows (73.1%); 3,282 unmatched, of which 75 ambiguous and 85 missing a name.
 #>           step      verify  pool matched ambiguous rejected cum_matched cum_pct zip_agree
 #>          exact        none 12126    8016        42        0        8016   65.6%     83.4%
-#>         tokens        none  4068      12         0        0        8028   65.7%     33.3%
-#>       nickname        none  4056     573        13        0        8601   70.4%     81.5%
-#>           typo        none  3483     261        20      245        8862   72.6%     66.7%
-#>     first_word no_conflict  3222      42         1       15        8904   72.9%    100.0%
-#>        initial no_conflict  3180       2         1        8        8906   72.9%    100.0%
-#>  compound_last no_conflict  3178      31         4       17        8937   73.2%    100.0%
+#>         tokens no_conflict  4068       4         0        8        8020   65.7%    100.0%
+#>       nickname        none  4064     573        13        0        8593   70.4%     81.5%
+#>           typo        none  3491     261        20      245        8854   72.5%     66.7%
+#>     first_word no_conflict  3230      42         1       15        8896   72.9%    100.0%
+#>        initial no_conflict  3188       2         1        8        8898   72.9%    100.0%
+#>  compound_last no_conflict  3186      31         4       17        8929   73.1%    100.0%
 ```
 
 Column guide:
@@ -138,7 +138,7 @@ everyone  <- nm_results(m, "all")
 
 table(unmatched$unmatched_reason)
 #>    ambiguous missing_name no_candidate     rejected
-#>           75           85         2875          239
+#>           75           85         2875          247
 ```
 
 Matched rows also have `match_step`, `n_candidates` and `zip_agree`. Columns
@@ -158,13 +158,13 @@ against the registry. The results are saved to `analysis/comparison.csv`.
 |------|--------|--------:|--:|------:|---------------:|------------------------:|----------------:|------------------:|
 | 2020 | legacy       | 15,790 | 69.5 | 13,166 | 1,141 | 41.3% | 1,240 | 13.6% |
 | 2020 | legacy + zip | 16,265 | 71.6 | 13,523 |   664 | 43.8% | 1,343 | 20.3% |
-| 2020 | recommended  | 15,188 | 66.9 | 13,523 |   207 | 71.4% |     – | –     |
+| 2020 | recommended  | 15,176 | 66.8 | 13,523 |   207 | 71.9% |     – | –     |
 | 2022 | legacy       |  9,139 | 74.8 |  7,803 |   555 | 48.7% |   581 | 16.5% |
 | 2022 | legacy + zip |  9,401 | 77.0 |  8,016 |   293 | 50.5% |   625 | 22.4% |
-| 2022 | recommended  |  8,937 | 73.2 |  8,016 |    75 | 78.2% |     – | –     |
+| 2022 | recommended  |  8,929 | 73.1 |  8,016 |    75 | 78.9% |     – | –     |
 | 2024 | legacy       | 38,222 | 72.3 | 32,555 | 2,340 | 50.3% | 2,611 | 16.9% |
 | 2024 | legacy + zip | 39,330 | 74.4 | 33,446 | 1,232 | 52.2% | 2,815 | 23.0% |
-| 2024 | recommended  | 37,315 | 70.6 | 33,446 |   324 | 81.9% |     – | –     |
+| 2024 | recommended  | 37,284 | 70.5 | 33,446 |   325 | 82.6% |     – | –     |
 
 The table shows four things:
 
@@ -176,7 +176,7 @@ The table shows four things:
   had a matching zip, against 83% for exact matches, so most were probably
   false. Even when restricted to matches that agree on zip, it still confuses
   relatives (see Caveats).
-- **The recommended pipeline** matches 1.6–2.6 points fewer rows than
+- **The recommended pipeline** matches 1.7–2.7 points fewer rows than
   legacy, mostly because Soundex is gone. Zip agreement on fuzzy matches rises
   from about 50% to about 80%. Rows left ambiguous fall sharply (555 → 75 in
   2022), because Soundex produced most of the ambiguous candidates.
@@ -194,8 +194,11 @@ The table shows four things:
   with the same last name: MICHELLE → MICHAEL, DON → DEANNA,
   RUSSELL → RACHEL. A zip check can't catch these. If you run it, review its
   matches by hand.
-- **Token-set matches agree on zip only 25–35% of the time.** There are only
-  12–49 of them per year, but they deserve a look.
+- **Token-set matches are verified against zip by default.** Without a check,
+  only 25–35% of them agreed on zip. Many names work as either a first or a
+  last name (CRAIG TAYLOR / TAYLOR CRAIG), so a swapped match is often a
+  different person. With `no_conflict` the step keeps 4 of 16 matches in
+  2020, 4 of 12 in 2022 and 17 of 49 in 2024.
 - **Moving `match_nickname()` before `match_typo()` matters.** Nicknames
   match more rows (and agree on zip more often) when they get the first pick.
 

@@ -89,3 +89,12 @@ test_that("steps run in any order and a repeated step gets a suffix", {
 test_that("steps reject objects that are not nm_match", {
   expect_error(match_tokens(data.frame()), "nm_setup")
 })
+
+test_that("tokens rejects swapped names whose check variables conflict by default", {
+  x <- make_x(c("Craig", "Keri"), c("Taylor", "Ault"), zip = c("1", "2"))
+  y <- make_y(c("TAYLOR", "AULT"), c("CRAIG", "KERI"), zip = c("9", "2"))
+  m <- setup_xy(x, y, check_by = "zip") |> match_tokens()
+  expect_equal(unname(matched_to(m)), c(NA, "r2"))
+  m <- setup_xy(x, y, check_by = "zip") |> match_tokens(verify = "none")
+  expect_equal(unname(matched_to(m)), c("r1", "r2"))
+})
