@@ -7,7 +7,8 @@
 # legacy_zip:  the same steps with zip as a check variable used only for
 #              tie-breaking (every step verify = "none").
 # recommended: zip check, placeholder zips as missing, default verify per step,
-#              Soundex last, plus the new initial and compound_last steps.
+#              plus the new initial and compound_last steps. No Soundex: it
+#              confuses relatives at the same address (see ?match_steps).
 
 if (requireNamespace("devtools", quietly = TRUE) && file.exists("DESCRIPTION")) {
   devtools::load_all(".", quiet = TRUE)
@@ -35,8 +36,7 @@ run <- function(x, config) {
       match_typo() |>
       match_first_word() |>
       match_initial() |>
-      match_compound_last() |>
-      match_soundex()
+      match_compound_last()
   } else {
     m |>
       match_exact() |>
@@ -75,7 +75,7 @@ for (year in c(2020, 2022, 2024)) {
       zip_agree_all = round(100 * zip_rate(x, m), 1),
       zip_agree_exact = round(100 * zip_rate(x, m, "exact"), 1),
       zip_agree_fuzzy = round(100 * zip_rate(x, m, setdiff(s$step, "exact")), 1),
-      soundex = s$matched[s$step == "soundex"],
+      soundex = if ("soundex" %in% s$step) s$matched[s$step == "soundex"] else 0L,
       zip_agree_soundex = round(100 * zip_rate(x, m, "soundex"), 1)
     )
     details[[paste(year, config)]] <- s

@@ -25,7 +25,7 @@
 #'   KATHERYN). Only names sharing a first letter are compared.
 #' * `match_soundex()`: first and last name both have the same Soundex code
 #'   (SMITH / SMYTH). Very loose; verified against check variables by
-#'   default.
+#'   default, but see the warning below.
 #' * `match_nickname()`: last name exact and first names in the same
 #'   nickname group (BOB / ROBERT). See [nicknames].
 #' * `match_first_word()`: last name exact and the first word of the first
@@ -50,6 +50,15 @@
 #' `"none"` for the stricter steps (exact, tokens, typo, nickname) and
 #' `"no_conflict"` for the looser ones (Soundex, first word, initial,
 #' compound last name).
+#'
+#' @section Warning:
+#' `match_soundex()` confuses relatives at the same address. Family members
+#' share a last name and a zip code, and many different first names share a
+#' Soundex code (MICHELLE / MICHAEL, DON / DEANNA, RUSSELL / RACHEL), so a zip
+#' check cannot catch these false matches. On the 2022 example file roughly
+#' 20 of 75 Soundex matches that agreed on zip were wrong. Review its matches
+#' by hand (`nm_results(m)` filtered to `match_step == "soundex"`) before
+#' using them.
 #'
 #' @param obj An `nm_match` object.
 #' @param verify How to use `check_by` variables to verify a match; one of

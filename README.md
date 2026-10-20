@@ -62,7 +62,7 @@ step is optional and can run in any order.
 | `match_first_word()` | last name exact, first word of the first name agrees: LISA E / LISA | `"no_conflict"` |
 | `match_initial()` | last name exact, one first name is only initials: D FRANKENSTEIN / DRACULA FRANKENSTEIN | `"no_conflict"` |
 | `match_compound_last()` | first name exact, one last name's words are a subset of the other's: GARCIA LOPEZ / GARCIA | `"no_conflict"` |
-| `match_soundex()` | first and last names sound alike: JON SMYTH / JOHN SMITH | `"no_conflict"` |
+| `match_soundex()` | first and last names sound alike: JON SMYTH / JOHN SMITH. **Not recommended** (see below) | `"no_conflict"` |
 
 `verify` has three modes:
 
@@ -108,11 +108,10 @@ m <- nm_setup(
   match_typo() |>
   match_first_word() |>
   match_initial() |>
-  match_compound_last() |>
-  match_soundex()
+  match_compound_last()
 
 nm_summary(m)
-#> Matched 9,012 of 12,211 rows (73.8%); 3,199 unmatched, of which 303 ambiguous and 85 missing a name.
+#> Matched 8,937 of 12,211 rows (73.2%); 3,274 unmatched, of which 75 ambiguous and 85 missing a name.
 #>           step      verify  pool matched ambiguous rejected cum_matched cum_pct zip_agree
 #>          exact        none 12126    8016        42        0        8016   65.6%     83.4%
 #>         tokens        none  4068      12         0        0        8028   65.7%     33.3%
@@ -121,7 +120,6 @@ nm_summary(m)
 #>     first_word no_conflict  3222      42         1       15        8904   72.9%    100.0%
 #>        initial no_conflict  3180       2         1        8        8906   72.9%    100.0%
 #>  compound_last no_conflict  3178      31         4       17        8937   73.2%    100.0%
-#>        soundex no_conflict  3147      75       248      399        9012   73.8%    100.0%
 ```
 
 Column guide:
@@ -140,7 +138,7 @@ everyone  <- nm_results(m, "all")
 
 table(unmatched$unmatched_reason)
 #>    ambiguous missing_name no_candidate     rejected
-#>          303           85         2275          536
+#>           75           85         2875          239
 ```
 
 Matched rows also have `match_step`, `n_candidates` and `zip_agree`. Columns
@@ -154,19 +152,19 @@ against the registry. The results are saved to `analysis/comparison.csv`.
 - **legacy**: the original six steps in the original order, names only. On
   2022 it reproduces `fuzzy_name_match.R` exactly (9,139 matched, 7,803 exact).
 - **legacy + zip**: the same steps, with zip used only to break ties.
-- **recommended**: the pipeline in the worked example.
+- **recommended**: the pipeline in the worked example (no Soundex).
 
 | year | config | matched | % | exact | ambiguous left | zip agree (fuzzy steps) | Soundex matches | Soundex zip agree |
 |------|--------|--------:|--:|------:|---------------:|------------------------:|----------------:|------------------:|
 | 2020 | legacy       | 15,790 | 69.5 | 13,166 | 1,141 | 41.3% | 1,240 | 13.6% |
 | 2020 | legacy + zip | 16,265 | 71.6 | 13,523 |   664 | 43.8% | 1,343 | 20.3% |
-| 2020 | recommended  | 15,348 | 67.6 | 13,523 |   684 | 73.9% |   160 | 100%  |
+| 2020 | recommended  | 15,188 | 66.9 | 13,523 |   207 | 71.4% |     – | –     |
 | 2022 | legacy       |  9,139 | 74.8 |  7,803 |   555 | 48.7% |   581 | 16.5% |
 | 2022 | legacy + zip |  9,401 | 77.0 |  8,016 |   293 | 50.5% |   625 | 22.4% |
-| 2022 | recommended  |  9,012 | 73.8 |  8,016 |   303 | 79.8% |    75 | 100%  |
+| 2022 | recommended  |  8,937 | 73.2 |  8,016 |    75 | 78.2% |     – | –     |
 | 2024 | legacy       | 38,222 | 72.3 | 32,555 | 2,340 | 50.3% | 2,611 | 16.9% |
 | 2024 | legacy + zip | 39,330 | 74.4 | 33,446 | 1,232 | 52.2% | 2,815 | 23.0% |
-| 2024 | recommended  | 37,631 | 71.2 | 33,446 | 1,248 | 83.3% |   316 | 100%  |
+| 2024 | recommended  | 37,315 | 70.6 | 33,446 |   324 | 81.9% |     – | –     |
 
 The table shows four things:
 
@@ -174,11 +172,14 @@ The table shows four things:
   213 of the 255 are resolved, which adds 213 exact matches; across all steps
   it adds 262 matches. Zip agreement among exact matches stays the same
   (82.9% → 83.4%).
-- **Verifying Soundex** removes most of its matches: 581 → 75 in 2022. Only
-  16.5% of the original Soundex matches had a matching zip. For exact matches
-  the figure is 83%, so most Soundex matches were probably false.
-- **The recommended pipeline** matches about 1–2 points fewer rows than
-  legacy. Zip agreement on fuzzy matches rises from about 50% to about 80%.
+- **Soundex is left out.** Only 16.5% of the original Soundex matches in 2022
+  had a matching zip, against 83% for exact matches, so most were probably
+  false. Even when restricted to matches that agree on zip, it still confuses
+  relatives (see Caveats).
+- **The recommended pipeline** matches 1.6–2.6 points fewer rows than
+  legacy, mostly because Soundex is gone. Zip agreement on fuzzy matches rises
+  from about 50% to about 80%. Rows left ambiguous fall sharply (555 → 75 in
+  2022), because Soundex produced most of the ambiguous candidates.
   The 2020 file agrees on zip less often than the others even for exact
   matches (70%), probably because people moved between 2020 and the registry
   snapshot.
@@ -187,11 +188,12 @@ The table shows four things:
 
 ### Caveats
 
-- **Soundex is still loose.** Roughly 20 of the 75 Soundex matches in 2022
-  look wrong even though the zip agrees. Most are people at the same
-  address with the same last name: MICHELLE → MICHAEL, DON → DEANNA,
-  RUSSELL → RACHEL. A zip check can't catch these. Consider leaving Soundex
-  out, or reviewing its matches by hand.
+- **`match_soundex()` is still in the package but should be used with care.**
+  With the zip check, it adds 75 matches in 2022, and roughly 20 of them look
+  wrong even though the zip agrees. Most are relatives at the same address
+  with the same last name: MICHELLE → MICHAEL, DON → DEANNA,
+  RUSSELL → RACHEL. A zip check can't catch these. If you run it, review its
+  matches by hand.
 - **Token-set matches agree on zip only 25–35% of the time.** There are only
   12–49 of them per year, but they deserve a look.
 - **Moving `match_nickname()` before `match_typo()` matters.** Nicknames

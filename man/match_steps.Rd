@@ -89,7 +89,7 @@ reference and last name exact, or the other way round (KATHRYN /
 KATHERYN). Only names sharing a first letter are compared.
 \item \code{match_soundex()}: first and last name both have the same Soundex code
 (SMITH / SMYTH). Very loose; verified against check variables by
-default.
+default, but see the warning below.
 \item \code{match_nickname()}: last name exact and first names in the same
 nickname group (BOB / ROBERT). See \link{nicknames}.
 \item \code{match_first_word()}: last name exact and the first word of the first
@@ -119,6 +119,17 @@ Without \code{check_by} variables every mode accepts. The defaults are
 \code{"none"} for the stricter steps (exact, tokens, typo, nickname) and
 \code{"no_conflict"} for the looser ones (Soundex, first word, initial,
 compound last name).
+}
+
+\section{Warning}{
+
+\code{match_soundex()} confuses relatives at the same address. Family members
+share a last name and a zip code, and many different first names share a
+Soundex code (MICHELLE / MICHAEL, DON / DEANNA, RUSSELL / RACHEL), so a zip
+check cannot catch these false matches. On the 2022 example file roughly
+20 of 75 Soundex matches that agreed on zip were wrong. Review its matches
+by hand (\code{nm_results(m)} filtered to \code{match_step == "soundex"}) before
+using them.
 }
 
 \examples{
