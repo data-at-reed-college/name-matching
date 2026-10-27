@@ -12,10 +12,19 @@ name and zip code.
 ## Install
 
 ```r
-# from a local clone
+install.packages("pak")
+pak::pak("data-at-reed-college/name-matching")
+library(namematch)
+```
+
+You can check the install with `packageVersion("namematch")`.
+
+### Installing from a local clone
+
+If you're developing the package, install it from a local clone instead:
+
+```r
 devtools::install()
-# or from GitHub
-remotes::install_github("data-at-reed-college/name-matching")
 ```
 
 ## How it works
